@@ -1,5 +1,7 @@
+import fs from "fs";
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
+import { parse, stringify } from "yaml";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,12 +13,48 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function Home() {
+export async function getStaticProps() {
+  // read all files from ./invoices
+  const invoices = fs.readdirSync("./invoices");
+  const invoiceData = await Promise.all(
+    invoices.map(async (invoice) => {
+      const content = await fs.promises.readFile(
+        `./invoices/${invoice}`,
+        "utf-8"
+      );
+      const contentJson = parse(content);
+      return {
+        name: invoice,
+        ...contentJson,
+      };
+    })
+  );
+  return {
+    props: {
+      invoices: invoiceData,
+    },
+  };
+}
+
+export default function Home({ invoices }: { invoices: any[] }) {
   return (
     <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
+      className={`${geistSans.variable} ${geistMono.variable} grid min-h-screen font-[family-name:var(--font-geist-sans)]`}
     >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+      <main className="flex flex-row gap-8 py-4">
+        <div className="min-h-screen px-6 max-w-[300px] border-r border-solid border-black/[.08] dark:border-white/[.145]">
+          <h1 className="text-2xl mb-4">Invoices</h1>
+          <ol className="list-inside list-decimal text-left">
+            {invoices.map((invoice) => (
+              <li className="mb-3">{invoice.name}</li>
+            ))}
+          </ol>
+        </div>
+        <div className="flex-1">
+          <h1 className="text-2xl mb-4">Invoice</h1>
+        </div>
+      </main>
+      {/* <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -61,54 +99,7 @@ export default function Home() {
             Read our docs
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </main> */}
     </div>
   );
 }
