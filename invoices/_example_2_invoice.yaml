@@ -1,24 +1,24 @@
-- date: 2025-01-01
-- number: 24-1202
-- items:
-    - name: TD production days
-      dates:
-        - 2024-12-05
-        - 2024-12-06
-        - 2024-12-07
-      quantity: 20
-      price_per: 1000
-      total: 20000
-- job_name: DuMo / Apple Intelligence Phase 3
-- job_number: DU-24427
-- job_title: TD
-- header:
-    address: 123 Main St, Suite 100, Anytown, USA 12345
-    tel: 123-456-7890
-    email: nima@email.com
-- billing:
-    agent: Dufour Productions LLC
-    address: 123 Main St, Suite 100, Anytown, USA 12345
-- invoice_terms: Net 30
-- tax_percent: 0
-- published: true
+name: DuMo / Apple Intelligence Phase 3
+invoice_number: DU-24427
+job_title: TD
+date: 2025-01-01
+number: 24-1202
+items:
+  - name: TD production days
+    dates:
+      - 2024-12-05
+      - 2024-12-06
+      - 2024-12-07
+    quantity: 20
+    price_per: 1000
+    total: 20000
+header:
+  address: 123 Main St, Suite 100, Anytown, USA 12345
+  tel: 123-456-7890
+  email: nima@email.com
+billing:
+  agent: Dufour Productions LLC
+  address: 123 Main St, Suite 100, Anytown, USA 12345
+invoice_terms: Net 30
+tax_percent: 0
+published: true

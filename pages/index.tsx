@@ -3,6 +3,11 @@ import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import { parse, stringify } from "yaml";
 
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
+import React, { useCallback } from "react";
+import Invoice from "@/components/Invoice";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,10 +27,12 @@ export async function getStaticProps() {
         `./invoices/${invoice}`,
         "utf-8"
       );
+      const { mtime } = await fs.promises.stat(`./invoices/${invoice}`);
       const contentJson = parse(content);
+      console.log(contentJson);
       return {
-        name: invoice,
         ...contentJson,
+        lastModified: mtime.toISOString(),
       };
     })
   );
@@ -36,70 +43,46 @@ export async function getStaticProps() {
   };
 }
 
+TimeAgo.addDefaultLocale(en);
 export default function Home({ invoices }: { invoices: any[] }) {
+  const timeAgo = new TimeAgo("en-US");
+  const [activeInvoice, setActiveInvoice] = React.useState<any>({});
+  const onActivateInvoice = useCallback(
+    (invoice: any) => () => {
+      setActiveInvoice(invoice);
+    },
+    []
+  );
   return (
     <div
       className={`${geistSans.variable} ${geistMono.variable} grid min-h-screen font-[family-name:var(--font-geist-sans)]`}
     >
       <main className="flex flex-row gap-8 py-4">
-        <div className="min-h-screen px-6 max-w-[300px] border-r border-solid border-black/[.08] dark:border-white/[.145]">
-          <h1 className="text-2xl mb-4">Invoices</h1>
-          <ol className="list-inside list-decimal text-left">
+        <div className="h-screen overflow-auto max-w-[300px] border-r border-solid border-black/[.08] dark:border-white/[.145]">
+          <h1 className="text-2xl mb-4 px-3">Invoices</h1>
+          <ol className="list-none text-left">
             {invoices.map((invoice) => (
-              <li className="mb-3">{invoice.name}</li>
+              <li
+                onClick={onActivateInvoice(invoice)}
+                className="cursor-pointer p-2 px-3 border-t border-black/[0.15] hover:bg-black/[0.05] dark:hover:bg-white/[0.06]"
+              >
+                <div className="font-semibold">{invoice.name}</div>
+                <small>
+                  Last modified {timeAgo.format(new Date(invoice.lastModified))}
+                </small>
+              </li>
             ))}
           </ol>
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl mb-4">Invoice</h1>
+          <h1 className="text-2xl mb-4">
+            {activeInvoice.name ? activeInvoice.name : "Select an Invoice"}
+          </h1>
+          <div className="">
+            <Invoice data={activeInvoice} />
+          </div>
         </div>
       </main>
-      {/* <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main> */}
     </div>
   );
 }
